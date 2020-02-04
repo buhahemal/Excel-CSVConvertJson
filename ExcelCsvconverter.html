@@ -1,0 +1,98 @@
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+    <script type="text/javascript"src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.3/xlsx.full.min.js"></script>
+
+<body>
+
+    Excel File Upload<input type="file" id="fileUpload" accept=".xls,.xlsx" /><br />
+    <button type="button" id="uploadExcel">Convert</button>
+    <pre id="jsonData"></pre>
+    CSV file Uplaod<input type="file" id="csvfile" accept=".csv" /><br />
+    <pre id="jsonDatacsv"></pre>
+    <button type="button" id="convertcsv">Convert</button>
+    
+  </body>
+  <script>
+    var selectedFile;
+    var colums;
+    var colums_types=[];
+    var csvfile;
+    var csvdata;
+    document.getElementById("fileUpload").addEventListener("change", function(event) {
+        selectedFile = event.target.files[0];
+      });
+    document.getElementById("uploadExcel").addEventListener("click", function() {
+        if (selectedFile) {
+          var fileReader = new FileReader();
+          fileReader.onload = function(event) {
+            var data = event.target.result;
+
+            var workbook = XLSX.read(data, {
+              type: "binary"
+            });
+            var i=0;
+            workbook.SheetNames.forEach(sheet => {
+              let rowObject = XLSX.utils.sheet_to_row_object_array(
+                workbook.Sheets[sheet]
+              );
+             	colums=Object.keys(rowObject[i]);
+             	for(let elem in rowObject[i]) {  
+            	  colums_types.push(typeof rowObject[i][elem]);
+            	}
+              i++;
+            });
+          };
+          fileReader.readAsBinaryString(selectedFile);
+        }
+        console.log(colums);
+        console.log(colums_types);
+      });
+    var fileInput = document.getElementById("csvfile"),
+
+    readFile = function () {
+        var reader = new FileReader();
+        reader.onload = function () {
+            console.log(csvJSON(reader.readAsBinaryString(fileInput.files[0])));
+        };
+        // start reading the file. When it is done, calls the onload event defined above.
+        
+    };
+
+	fileInput.addEventListener('change', readFile);
+
+   document.getElementById("convertcsv").addEventListener("click", function() {
+	   
+   });
+    function csvJSON(csv){
+
+    	  var lines=csv.split("\n");
+
+    	  var result = [];
+
+    	  var headers=lines[0].split(",");
+
+    	  for(var i=1;i<lines.length;i++){
+			
+    		  var obj = {};
+    		  var currentline=lines[i].split(",");
+
+    		  for(var j=0;j<headers.length;j++){
+    			  obj[headers[j]] = currentline[j];
+    		  }
+
+    		  result.push(obj);
+
+    	  }
+    	  
+    	  //return result; //JavaScript object
+    	  return JSON.stringify(result); //JSON
+    	}
+
+  </script>
+</html>
